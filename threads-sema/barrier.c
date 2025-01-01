@@ -17,7 +17,8 @@ typedef struct __barrier_t {
   size_t n;
   size_t count;
   sem_t mutex;
-  sem_t turnstile;
+  sem_t turnstile1;
+  sem_t turnstile2;
 } barrier_t;
 
 // the single barrier we are using for this program
@@ -28,21 +29,34 @@ void barrier_init(barrier_t *b, int num_threads) {
   b->n = num_threads;
   b->count = 0;
   Sem_init(&b->mutex, 1);
-  Sem_init(&b->turnstile, 0);
+  Sem_init(&b->turnstile1, 0);
+  Sem_init(&b->turnstile2, 0);
 }
 
 void barrier(barrier_t *b) {
   // barrier code goes here
+
+  // phase 1
   Sem_wait(&b->mutex);
   b->count += 1;
+  if (b->count == b->n) {
+    Sem_post(&b->turnstile1);
+  }
   Sem_post(&b->mutex);
 
-  if (b->count == b->n) {
-    Sem_post(&b->turnstile);
-  }
+  Sem_wait(&b->turnstile1);
+  Sem_post(&b->turnstile1);
 
-  Sem_wait(&b->turnstile);
-  Sem_post(&b->turnstile);
+  // phase 2
+  Sem_wait(&b->mutex);
+  b->count -= 1;
+  if (b->count == 0) {
+    Sem_post(&b->turnstile2);
+  }
+  Sem_post(&b->mutex);
+
+  Sem_wait(&b->turnstile2);
+  Sem_post(&b->turnstile2);
 }
 
 //
