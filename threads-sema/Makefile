@@ -1,4 +1,4 @@
-TARGETS = fork-join
+TARGETS = fork-join rendezvous
 
 CFLAGS = -Wall -pthread
 
