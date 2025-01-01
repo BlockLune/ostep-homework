@@ -1,4 +1,4 @@
-TARGETS = fork-join rendezvous barrier
+TARGETS = fork-join rendezvous barrier reader-writer
 
 CFLAGS = -Wall -pthread
 
